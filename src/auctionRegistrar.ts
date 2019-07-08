@@ -45,6 +45,7 @@ export function bidRevealed(event: BidRevealed): void {
   }
 
   let name = AuctionedName.load(event.params.hash.toHex())
+  if(name === null) return;
   switch(event.params.status) {
     case 0: // Harmless invalid bid
     case 1: // Bid revealed late
