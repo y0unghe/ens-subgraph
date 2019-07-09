@@ -6,11 +6,11 @@
   "scripts": {
     "setup": "npm run codegen && npm run create-local && npm run deploy-local",
     "codegen": "graph codegen --output-dir src/types/",
-    "create-local": "graph create graphprotocol/ensRopsten --node http://127.0.0.1:8020",
+    "create-local": "graph create graphprotocol/ensGoerli --node http://127.0.0.1:8020",
     "build": "graph build",
-    "deploy-local": "graph deploy graphprotocol/ensRopsten --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020/",
-    "deploy": "graph deploy ensdomains/ensRopsten --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
-    "watch-local": "graph deploy graphprotocol/ensRopsten --watch --debug --node http://127.0.0.1:8020/ --ipfs http://localhost:5001"
+    "deploy-local": "graph deploy graphprotocol/ensGoerli --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020/",
+    "deploy": "graph deploy ensdomains/ensGoerli --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
+    "watch-local": "graph deploy graphprotocol/ensGoerli --watch --debug --node http://127.0.0.1:8020/ --ipfs http://localhost:5001"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.11.2",

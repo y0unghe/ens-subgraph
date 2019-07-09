@@ -6,13 +6,13 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: ENSRegistry
-    network: ropsten
+    network: goerli
     source:
       address: '0x112234455c3a32fd11230c42e7bccd4a84e02010'
       abi: EnsRegistry
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.2
+      apiVersion: 0.0.3
       language: wasm/assemblyscript
       file: ./src/ensRegistry.ts
       entities:
@@ -23,22 +23,22 @@ dataSources:
         - name: EnsRegistry
           file: ./abis/Registry.json
       eventHandlers:
-        - event: Transfer(bytes32,address)
+        - event: Transfer(indexed bytes32,address)
           handler: handleTransfer
-        - event: NewOwner(bytes32,bytes32,address)
+        - event: NewOwner(indexed bytes32,indexed bytes32,address)
           handler: handleNewOwner
-        - event: NewResolver(bytes32,address)
+        - event: NewResolver(indexed bytes32,address)
           handler: handleNewResolver
-        - event: NewTTL(bytes32,uint64)
+        - event: NewTTL(indexed bytes32,uint64)
           handler: handleNewTTL
   - kind: ethereum/contract
     name: Resolver
-    network: mainnet
+    network: goerli
     source:
       abi: Resolver
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.2
+      apiVersion: 0.0.3
       language: wasm/assemblyscript
       file: ./src/resolver.ts
       entities:
@@ -55,62 +55,33 @@ dataSources:
         - name: Resolver
           file: ./abis/PublicResolver.json
       eventHandlers:
-        - event: ABIChanged(bytes32,uint256)
+        - event: ABIChanged(indexed bytes32,indexed uint256)
           handler: handleABIChanged
-        - event: AddrChanged(bytes32,address)
+        - event: AddrChanged(indexed bytes32,address)
           handler: handleAddrChanged
-        - event: AddressChanged(bytes32,uint256,bytes)
+        - event: AddressChanged(indexed bytes32,indexed uint256,bytes)
           handler: handleMulticoinAddrChanged
-        - event: AuthorisationChanged(bytes32,address,address,bool)
+        - event: AuthorisationChanged(indexed bytes32,indexed address,indexed address,bool)
           handler: handleAuthorisationChanged
-        - event: ContenthashChanged(bytes32,bytes)
+        - event: ContenthashChanged(indexed bytes32,bytes)
           handler: handleContentHashChanged
-        - event: InterfaceChanged(bytes32,bytes4,address)
+        - event: InterfaceChanged(indexed bytes32,indexed bytes4,address)
           handler: handleInterfaceChanged
-        - event: NameChanged(bytes32,string)
+        - event: NameChanged(indexed bytes32,string)
           handler: handleNameChanged
-        - event: PubkeyChanged(bytes32,bytes32,bytes32)
+        - event: PubkeyChanged(indexed bytes32,bytes32,bytes32)
           handler: handlePubkeyChanged
         - event: TextChanged(bytes32,string,string)
           handler: handleTextChanged
   - kind: ethereum/contract
-    name: AuctionRegistrar
-    network: mainnet
-    source:
-      address: '0xc68de5b43c3d980b0c110a77a5f78d3c4c4d63b4'
-      abi: AuctionRegistrar
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.2
-      language: wasm/assemblyscript
-      file: ./src/auctionRegistrar.ts
-      entities:
-        - Account
-        - AuctionedName
-        - Deed
-      abis:
-        - name: AuctionRegistrar
-          file: ./abis/AuctionRegistrar.json
-      eventHandlers:
-        - event: AuctionStarted(bytes32,uint256)
-          handler: auctionStarted
-        - event: BidRevealed(bytes32,address,uint256,uint8)
-          handler: bidRevealed
-        - event: HashRegistered(bytes32,address,uint256,uint256)
-          handler: hashRegistered
-        - event: HashInvalidated(bytes32,string,uint256,uint256)
-          handler: hashInvalidated
-        - event: HashReleased(bytes32,uint256)
-          handler: hashReleased
-  - kind: ethereum/contract
     name: BaseRegistrar
-    network: mainnet
+    network: goerli
     source:
-      address: '0x227Fcb6Ddf14880413EF4f1A3dF2Bbb32bcb29d7'
+      address: '0x9De50f28b5BC29C447a927f71c79b800891dC316'
       abi: BaseRegistrar
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.2
+      apiVersion: 0.0.3
       language: wasm/assemblyscript
       file: ./src/ethRegistrar.ts
       entities:
@@ -123,23 +94,23 @@ dataSources:
         - name: BaseRegistrar
           file: ./abis/BaseRegistrar.json
       eventHandlers:
-        - event: NameMigrated(uint256,address,uint256)
+        - event: NameMigrated(indexed uint256,indexed address,uint256)
           handler: handleNameMigrated
-        - event: NameRegistered(uint256,address,uint256)
+        - event: NameRegistered(indexed uint256,indexed address,uint256)
           handler: handleNameRegistered
-        - event: NameRenewed(uint256,uint256)
+        - event: NameRenewed(indexed uint256,uint256)
           handler: handleNameRenewed
         - event: Transfer(address,address,uint256)
           handler: handleNameTransferred
   - kind: ethereum/contract
     name: EthRegistrarController
-    network: mainnet
+    network: goerli
     source:
-      address: '0x357dbd063bea7f0713bf88a3e97b7436b0235979'
+      address: '0x03b806a9bc38969cbf907911999aa11b5299d7f1'
       abi: EthRegistrarController
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.2
+      apiVersion: 0.0.3
       language: wasm/assemblyscript
       file: ./src/ethRegistrar.ts
       entities:
@@ -148,11 +119,11 @@ dataSources:
         - name: EthRegistrarController
           file: ./abis/EthRegistrarController.json
       eventHandlers:
-        - event: NameRegistered(string,bytes32,address,uint256,uint256)
+        - event: NameRegistered(string,indexed bytes32,indexed address,uint256,uint256)
           handler: handleNameRegisteredByController
   - kind: ethereum/contract
     name: Deed
-    network: mainnet
+    network: goerli
     source:
       abi: Deed
     mapping:
