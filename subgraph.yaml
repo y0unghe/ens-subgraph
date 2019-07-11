@@ -74,6 +74,33 @@ dataSources:
         - event: TextChanged(bytes32,string,string)
           handler: handleTextChanged
   - kind: ethereum/contract
+    name: AuctionRegistrar
+    network: goerli
+    source:
+      address: '0xf105795bf5d1b1894e70bd04dc846898ab19fa62'
+      abi: AuctionRegistrar
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/auctionRegistrar.ts
+      entities:
+        - AuctionedName
+      abis:
+        - name: AuctionRegistrar
+          file: ./abis/AuctionRegistrar.json
+      eventHandlers:
+        - event: AuctionStarted(indexed bytes32,uint256)
+          handler: auctionStarted
+        - event: BidRevealed(indexed bytes32,indexed address,uint256,uint8)
+          handler: bidRevealed
+        - event: HashRegistered(indexed bytes32,indexed address,uint256,uint256)
+          handler: hashRegistered
+        - event: HashInvalidated(indexed bytes32,indexed string,uint256,uint256)
+          handler: hashInvalidated
+        - event: HashReleased(indexed bytes32,uint256)
+          handler: hashReleased
+  - kind: ethereum/contract
     name: BaseRegistrar
     network: goerli
     source:
