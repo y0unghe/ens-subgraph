@@ -146,7 +146,7 @@ dataSources:
           handler: handleNameRegisteredByController
   - kind: ethereum/contract
     name: Deed
-    network: mainnet
+    network: ropsten
     source:
       abi: Deed
     mapping:
