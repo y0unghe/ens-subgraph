@@ -124,13 +124,22 @@ type NameRenewed implements RegistrationEvent @entity {
   expiryDate: BigInt!
 }
 
+type NameTransferred implements RegistrationEvent @entity {
+  id: ID!
+  registration: Registration!
+  blockNumber: Int!
+  transactionID: Bytes!
+  newOwner: Account!
+}
+
 type Resolver @entity {
   id: ID!                   # Concatenation of resolver address and namehash
   domain: Domain!
   address: Bytes!           # Address of resolver contract
 
   addr: Account             # Current value of addr record (per events)
-  texts: [String!]!         # Set of observed text record keys
+  texts: [String!]          # Set of observed text record keys
+  coinTypes: [Int!]         # Set of observed SLIP-44 coin types
   events: [ResolverEvent!]! @derivedFrom(field: "resolver")
 }
 
@@ -147,6 +156,15 @@ type AddrChanged implements ResolverEvent @entity {
   blockNumber: Int!
   transactionID: Bytes!
   addr: Account!
+}
+
+type MulticoinAddrChanged implements ResolverEvent @entity {
+  id: ID!
+  resolver: Resolver!
+  blockNumber: Int!
+  transactionID: Bytes!
+  coinType: Int!
+  addr: Bytes!
 }
 
 type NameChanged implements ResolverEvent @entity {
