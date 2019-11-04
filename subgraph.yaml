@@ -43,6 +43,7 @@ dataSources:
       file: ./src/resolver.ts
       entities:
         - AddrChanged
+        - MulticoinAddrChanged
         - NameChanged
         - AbiChanged
         - PubkeyChanged
@@ -58,6 +59,8 @@ dataSources:
           handler: handleABIChanged
         - event: AddrChanged(bytes32,address)
           handler: handleAddrChanged
+        - event: AddressChanged(bytes32,uint256,bytes)
+          handler: handleMulticoinAddrChanged
         - event: AuthorisationChanged(bytes32,address,address,bool)
           handler: handleAuthorisationChanged
         - event: ContenthashChanged(bytes32,bytes)
@@ -115,6 +118,7 @@ dataSources:
         - NameRegistered
         - NameMigrated
         - NameRenewed
+        - NameTransferred
       abis:
         - name: BaseRegistrar
           file: ./abis/BaseRegistrar.json
@@ -125,6 +129,8 @@ dataSources:
           handler: handleNameRegistered
         - event: NameRenewed(uint256,uint256)
           handler: handleNameRenewed
+        - event: Transfer(address,address,uint256)
+          handler: handleNameTransferred
   - kind: ethereum/contract
     name: EthRegistrarController
     network: ropsten
