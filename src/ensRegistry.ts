@@ -60,7 +60,7 @@ function _handleNewOwner(event: NewOwnerEvent, isMigrated:boolean): void {
 }
 
 // Handler for Transfer events
-export function handleTransfer(event: TransferEvent): void {
+export function _handleTransfer(event: TransferEvent, isMigrated:boolean): void {
   let node = event.params.node.toHexString()
 
   let account = new Account(event.params.owner.toHexString())
@@ -69,7 +69,7 @@ export function handleTransfer(event: TransferEvent): void {
   // Update the domain owner
   let domain = new Domain(node)
   if(node == ROOT_NODE){
-    domain.isMigrated = true
+    domain.isMigrated = isMigrated
   }
   domain.owner = account.id
   domain.save()
@@ -161,9 +161,14 @@ export function handleNewTTLOldRegistry(event: NewTTLEvent): void {
   }
 }
 
+export function handleTransfer(event: TransferEvent): void {
+  _handleTransfer(event, true)
+}
+
 export function handleTransferOldRegistry(event: TransferEvent): void {
-  let domain = Domain.load(event.params.node.toHexString())
-  if(domain.isMigrated == false){
-    handleTransfer(event)
+  let node = event.params.node.toHexString()
+  let domain = Domain.load(node)
+  if(node == ROOT_NODE || domain.isMigrated == false){
+    _handleTransfer(event, false)
   }
 }
