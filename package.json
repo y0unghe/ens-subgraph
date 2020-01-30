@@ -7,13 +7,15 @@
     "setup": "npm run codegen && npm run create-local && npm run deploy-local",
     "codegen": "graph codegen --output-dir src/types/",
     "create-local": "graph create graphprotocol/ensRinkeby --node http://127.0.0.1:8020",
+    "remove-local": "graph remove graphprotocol/ensRinkeby --node http://127.0.0.1:8020",
     "build": "graph build",
     "deploy-local": "graph deploy graphprotocol/ensRinkeby --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020/",
     "deploy": "graph deploy ensdomains/ensRinkeby --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
     "watch-local": "graph deploy graphprotocol/ensRinkeby --watch --debug --node http://127.0.0.1:8020/ --ipfs http://localhost:5001"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "^0.11.2",
-    "@graphprotocol/graph-ts": "^0.15.1"
-  }
+    "@graphprotocol/graph-cli": "^0.17.1",
+    "@graphprotocol/graph-ts": "^0.17.0"
+  },
+  "dependencies": {}
 }
