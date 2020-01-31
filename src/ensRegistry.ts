@@ -98,7 +98,7 @@ export function handleTransfer(event: TransferEvent): void {
 }
 
 // Handler for NewResolver events
-function _handleNewResolver(event: NewResolverEvent, isMigrated:boolean): void {
+function handleNewResolver(event: NewResolverEvent): void {
   let id = event.params.resolver.toHexString().concat('-').concat(event.params.node.toHexString())
 
   let node = event.params.node.toHexString()
@@ -153,16 +153,12 @@ export function handleNewOwnerOldRegistry(event: NewOwnerEvent): void {
   }
 }
 
-export function handleNewResolver(event: NewResolverEvent): void {
-  _handleNewResolver(event, true)
-}
-
 export function handleNewResolverOldRegistry(event: NewResolverEvent): void {
   let node = event.params.node.toHexString()
   let domain = getDomain(node)
 
   if(node == ROOT_NODE || domain.isMigrated == false){
-    _handleNewResolver(event, false)
+    handleNewResolver(event)
   }
 }
 export function handleNewTTLOldRegistry(event: NewTTLEvent): void {
