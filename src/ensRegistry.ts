@@ -44,6 +44,9 @@ function _handleNewOwner(event: NewOwnerEvent, isMigrated: boolean): void {
 
   let subnode = crypto.keccak256(concat(event.params.node, event.params.label)).toHexString()
   let domain = getDomain(subnode);
+  if(domain == null) {
+    domain = new Domain(subnode)
+  }
 
   if(domain.name == null) {
     // Get label and node names
@@ -98,7 +101,7 @@ export function handleTransfer(event: TransferEvent): void {
 }
 
 // Handler for NewResolver events
-function handleNewResolver(event: NewResolverEvent): void {
+export function handleNewResolver(event: NewResolverEvent): void {
   let id = event.params.resolver.toHexString().concat('-').concat(event.params.node.toHexString())
 
   let node = event.params.node.toHexString()
