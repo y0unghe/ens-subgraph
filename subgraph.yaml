@@ -102,35 +102,6 @@ dataSources:
           handler: handlePubkeyChanged
         - event: 'TextChanged(indexed bytes32,indexed string,string)'
           handler: handleTextChanged
-  # - kind: ethereum/contract
-  #   name: AuctionRegistrar
-  #   network: rinkeby
-  #   source:
-  #     address: '0x6090a6e47849629b7245dfa1ca21d94cd15878ef'
-  #     abi: AuctionRegistrar
-  #   mapping:
-  #     kind: ethereum/events
-  #     apiVersion: 0.0.3
-  #     language: wasm/assemblyscript
-  #     file: ./src/auctionRegistrar.ts
-  #     entities:
-  #       - Account
-  #       - AuctionedName
-  #       - Deed
-  #     abis:
-  #       - name: AuctionRegistrar
-  #         file: ./abis/AuctionRegistrar.json
-  #     eventHandlers:
-  #       - event: AuctionStarted(bytes32,uint256)
-  #         handler: auctionStarted
-  #       - event: BidRevealed(bytes32,address,uint256,uint8)
-  #         handler: bidRevealed
-  #       - event: HashRegistered(bytes32,address,uint256,uint256)
-  #         handler: hashRegistered
-  #       - event: HashInvalidated(bytes32,string,uint256,uint256)
-  #         handler: hashInvalidated
-  #       - event: HashReleased(bytes32,uint256)
-  #         handler: hashReleased
   - kind: ethereum/contract
     name: BaseRegistrar
     network: rinkeby
@@ -145,15 +116,12 @@ dataSources:
       entities:
         - Registration
         - NameRegistered
-        - NameMigrated
         - NameRenewed
         - NameTransferred
       abis:
         - name: BaseRegistrar
           file: ./abis/BaseRegistrar.json
       eventHandlers:
-        - event: 'NameMigrated(indexed uint256,indexed address,uint256)'
-          handler: handleNameMigrated
         - event: 'NameRegistered(indexed uint256,indexed address,uint256)'
           handler: handleNameRegistered
         - event: 'NameRenewed(indexed uint256,uint256)'
@@ -179,21 +147,5 @@ dataSources:
       eventHandlers:
         - event: 'NameRegistered(string,indexed bytes32,indexed address,uint256,uint256)'
           handler: handleNameRegisteredByController
-  # - kind: ethereum/contract
-  #   name: Deed
-  #   network: rinkeby
-  #   source:
-  #     abi: Deed
-  #   mapping:
-  #     kind: ethereum/events
-  #     apiVersion: 0.0.3
-  #     language: wasm/assemblyscript
-  #     file: ./src/auctionRegistrar.ts
-  #     entities:
-  #       - AuctionedName
-  #     abis:
-  #       - name: Deed
-  #         file: ./abis/Deed.json
-  #     eventHandlers:
-  #       - event: OwnerChanged(address)
-  #         handler: deedTransferred
+        - event: 'NameRenewed(string,indexed bytes32,uint256,uint256)'
+          handler: handleNameRenewedByController

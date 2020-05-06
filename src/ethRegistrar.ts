@@ -1,7 +1,8 @@
 // Import types and APIs from graph-ts
 import {
   ByteArray,
-  crypto
+  crypto,
+  ens
 } from '@graphprotocol/graph-ts'
 
 import {
@@ -11,41 +12,20 @@ import {
 
 // Import event types from the registry contract ABI
 import {
-  NameMigrated as NameMigratedEvent,
   NameRegistered as NameRegisteredEvent,
   NameRenewed as NameRenewedEvent,
   Transfer as TransferEvent,
 } from './types/BaseRegistrar/BaseRegistrar'
 
 import {
-  NameRegistered as ControllerNameRegisteredEvent
+  NameRegistered as ControllerNameRegisteredEvent,
+  NameRenewed as ControllerNameRenewedEvent
 } from './types/EthRegistrarController/EthRegistrarController'
 
 // Import entity types generated from the GraphQL schema
-import { Account, AuctionedName, Domain, Registration, NameMigrated, NameRegistered, NameRenewed, NameTransferred } from './types/schema'
+import { Account, Domain, Registration, NameRegistered, NameRenewed, NameTransferred } from './types/schema'
 
 var rootNode:ByteArray = byteArrayFromHex("93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae")
-
-export function handleNameMigrated(event: NameMigratedEvent): void {
-  let label = uint256ToByteArray(event.params.id)
-
-  let auctionedName = AuctionedName.load(label.toHex())
-
-  let registration = new Registration(label.toHex())
-  registration.domain = crypto.keccak256(concat(rootNode, label)).toHex();
-  registration.registrationDate = auctionedName.registrationDate
-  registration.expiryDate = event.params.expires
-  registration.registrant = event.params.owner.toHex()
-  registration.save()
-
-  let registrationEvent = new NameMigrated(createEventID(event))
-  registrationEvent.registration = registration.id
-  registrationEvent.blockNumber = event.block.number.toI32()
-  registrationEvent.transactionID = event.transaction.hash
-  registrationEvent.registrant = event.params.owner.toHex()
-  registrationEvent.expiryDate = event.params.expires
-  registrationEvent.save()
-}
 
 export function handleNameRegistered(event: NameRegisteredEvent): void {
   let account = new Account(event.params.owner.toHex())
@@ -57,6 +37,11 @@ export function handleNameRegistered(event: NameRegisteredEvent): void {
   registration.registrationDate = event.block.timestamp
   registration.expiryDate = event.params.expires
   registration.registrant = account.id
+
+  let labelName = ens.nameByHash(label.toHexString())
+  if (labelName != null) {
+    registration.labelName = labelName
+  }
   registration.save()
 
   let registrationEvent = new NameRegistered(createEventID(event))
@@ -75,6 +60,23 @@ export function handleNameRegisteredByController(event: ControllerNameRegistered
     domain.name = event.params.name + '.eth'
     domain.save()
   }
+
+  let registration = Registration.load(event.params.label.toHex());
+  if(registration == null) return
+  registration.labelName = event.params.name
+}
+
+export function handleNameRenewedByController(event: ControllerNameRenewedEvent): void {
+  let domain = new Domain(crypto.keccak256(concat(rootNode, event.params.label)).toHex())
+  if(domain.labelName !== event.params.name) {
+    domain.labelName = event.params.name
+    domain.name = event.params.name + '.eth'
+    domain.save()
+  }
+
+  let registration = Registration.load(event.params.label.toHex());
+  if(registration == null) return
+  registration.labelName = event.params.name
 }
 
 export function handleNameRenewed(event: NameRenewedEvent): void {
@@ -92,18 +94,20 @@ export function handleNameRenewed(event: NameRenewedEvent): void {
 }
 
 export function handleNameTransferred(event: TransferEvent): void {
+  let account = new Account(event.params.to.toHex())
+  account.save()
+
   let label = uint256ToByteArray(event.params.tokenId)
-  let registrant = event.params.to.toHex()
   let registration = Registration.load(label.toHex())
   if(registration == null) return;
 
-  registration.registrant = registrant
+  registration.registrant = account.id
   registration.save()
 
   let transferEvent = new NameTransferred(createEventID(event))
   transferEvent.registration = label.toHex()
   transferEvent.blockNumber = event.block.number.toI32()
   transferEvent.transactionID = event.transaction.hash
-  transferEvent.newOwner = registrant
+  transferEvent.newOwner = account.id
   transferEvent.save()
 }

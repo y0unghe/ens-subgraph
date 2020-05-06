@@ -4,14 +4,18 @@
   "repository": "https://github.com/ensdomains/ens-subgraph",
   "license": "MIT",
   "scripts": {
-    "setup": "npm run codegen && npm run create-local && npm run deploy-local",
     "codegen": "graph codegen --output-dir src/types/",
     "create-local": "graph create graphprotocol/ensRinkeby --node http://127.0.0.1:8020",
     "remove-local": "graph remove graphprotocol/ensRinkeby --node http://127.0.0.1:8020",
     "build": "graph build",
     "deploy-local": "graph deploy graphprotocol/ensRinkeby --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020/",
     "deploy": "graph deploy ensdomains/ensRinkeby --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
-    "watch-local": "graph deploy graphprotocol/ensRinkeby --watch --debug --node http://127.0.0.1:8020/ --ipfs http://localhost:5001"
+    "watch-local": "graph deploy graphprotocol/ensRinkeby --watch --debug --node http://127.0.0.1:8020/ --ipfs http://localhost:5001",
+    "setup": "npm run codegen && npm run create-local && npm run deploy-local",
+    "docker:setup": "npm run codegen && npm run docker:create-local && npm run docker:deploy-local",
+    "docker:create-local": "graph create graphprotocol/ensRinkeby --node http://ens-app_graph-node_1:8020",
+    "docker:deploy-local": "graph deploy graphprotocol/ensRinkeby --debug --ipfs http://ens-app_ipfs_1:5001 --node http://ens-app_graph-node_1:8020/",
+    "docker:remove-local": "graph remove graphprotocol/ensRinkeby --node http://ens-app_graph-node_1:8020"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.17.1",
