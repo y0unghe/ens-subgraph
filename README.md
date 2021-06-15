@@ -32,7 +32,7 @@ Here we have example queries, so that you don't have to type them in yourself ea
     domain {
       id
     }
-    events {
+    resolverEvents {
       id
       node
       ... on AddrChanged {
