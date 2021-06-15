@@ -66,7 +66,7 @@ export function handleNameWrapped(event: NameWrappedEvent): void {
   nameWrappedEvent.domain = domain.id
   nameWrappedEvent.name = name
   nameWrappedEvent.fuses = fuses
-  nameWrappedEvent.owner=owner.id
+  nameWrappedEvent.owner = owner.id
   nameWrappedEvent.blockNumber = blockNumber
   nameWrappedEvent.transactionID = transactionID
   nameWrappedEvent.save()
@@ -81,7 +81,7 @@ export function handleNameUnwrapped(event: NameUnwrappedEvent): void {
 
   let nameUnwrappedEvent = new NameUnwrapped(createEventID(event))  
   nameUnwrappedEvent.domain = domain.id
-  nameUnwrappedEvent.owner=owner.id
+  nameUnwrappedEvent.owner = owner.id
   nameUnwrappedEvent.blockNumber = blockNumber
   nameUnwrappedEvent.transactionID = transactionID
   nameUnwrappedEvent.save()
