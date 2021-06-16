@@ -11,6 +11,7 @@ type Domain @entity {
   ttl: BigInt
   isMigrated: Boolean!
   createdAt: BigInt!
+  fuses: BigInt
   events: [DomainEvent!]! @derivedFrom(field: "domain")
 }
 

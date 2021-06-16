@@ -59,8 +59,10 @@ export function handleNameWrapped(event: NameWrappedEvent): void {
   if(!domain.labelName){
     domain.labelName = label
     domain.name = name
-    domain.save()
   }
+  domain.owner = owner.id
+  domain.fuses = fuses
+  domain.save()
 
   let nameWrappedEvent = new NameWrapped(createEventID(event))  
   nameWrappedEvent.domain = domain.id
@@ -78,6 +80,9 @@ export function handleNameUnwrapped(event: NameUnwrappedEvent): void {
   let transactionID = event.transaction.hash
   let owner = Account.load(event.params.owner.toHex())
   let domain = Domain.load(node.toHex())
+  domain.owner = owner.id
+  domain.fuses = null
+  domain.save()
 
   let nameUnwrappedEvent = new NameUnwrapped(createEventID(event))  
   nameUnwrappedEvent.domain = domain.id
@@ -93,7 +98,8 @@ export function handleFusesBurned(event: FusesBurnedEvent): void {
   let blockNumber = event.block.number.toI32()
   let transactionID = event.transaction.hash
   let domain = Domain.load(node.toHex())
-
+  domain.fuses = fuses
+  domain.save()
   let fusesBurnedEvent = new FusesBurned(createEventID(event))  
   fusesBurnedEvent.domain = domain.id
   fusesBurnedEvent.fuses = fuses
