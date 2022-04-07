@@ -12,8 +12,10 @@ async function main() {
   let counter = 0
   let data
   const interval = setInterval(async() => {
-    console.log(counter)
-    if(counter === 100){
+    if(counter % 10 === 0){
+      console.log(counter)
+    }
+    if(counter === 600){
       throw(`Timing out after ${retrynum} attempt`)
     }
     try{
@@ -23,7 +25,7 @@ async function main() {
         clearInterval(interval);
       };
     }catch(e){
-      console.log({e})
+      // console.log({e})
     }finally{
       counter = counter+1
     }
