@@ -9,6 +9,7 @@
     "create-local": "graph create graphprotocol/ens --node http://127.0.0.1:8020",
     "deploy-local": "graph deploy graphprotocol/ens --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020/ --version-label 0.0.1",
     "remove-local": "graph remove graphprotocol/ens --node http://127.0.0.1:8020",
+    "check-local": "yarn node scripts/check-index.js",
     "docker:setup": "npm run codegen && npm run docker:create-local && npm run docker:deploy-local",
     "docker:create-local": "graph create graphprotocol/ens --node http://ens-app_graph-node_1:8020",
     "docker:deploy-local": "graph deploy graphprotocol/ens --debug --ipfs http://ens-app_ipfs_1:5001 --node http://ens-app_graph-node_1:8020/ --version-label 0.0.1",
@@ -19,8 +20,9 @@
   },
   "devDependencies": {
     "@ensdomains/content-hash": "^2.5.3",
-    "@graphprotocol/graph-cli": "^0.23.2",
-    "@graphprotocol/graph-ts": "^0.23.1"
+    "@graphprotocol/graph-cli": "^0.29.0",
+    "@graphprotocol/graph-ts": "^0.26.0",
+    "graphql-request": "^4.2.0"
   },
   "dependencies": {}
 }
