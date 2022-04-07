@@ -8,34 +8,26 @@ const GET_LABEL_NAME = gql`
     }
   }
 `
-
-async function waitUntil(condition) {
-    let counter = 0
-    const retrynum = 100
-    return await new Promise(resolve => {
-      const interval = setInterval(() => {
-        console.log(counter)
-        if(counter === 100){
-          throw(`Timing out after ${retrynum} attempt`)
-        }
-        if (condition) {
-          resolve('foo');
-          clearInterval(interval);
-        };
-        counter = counter+1
-      }, 1000);
-    });
-  }
-
 async function main() {
+  let counter = 0
   let data
-  try{  
-    data = await request(url, GET_LABEL_NAME)
-    console.log(data.registrations)
-  }catch(e){
-  }finally{
-    waitUntil(data?.registrations[0].labelName === 'released')
-  }
+  const interval = setInterval(async() => {
+    console.log(counter)
+    if(counter === 100){
+      throw(`Timing out after ${retrynum} attempt`)
+    }
+    try{
+      data = await request(url, GET_LABEL_NAME)
+      console.log(data)
+      if (data?.registrations[0].labelName === 'released') {
+        clearInterval(interval);
+      };
+    }catch(e){
+      console.log({e})
+    }finally{
+      counter = counter+1
+    }
+  }, 1000);
 }
 main()
 
