@@ -1,132 +1,160 @@
 // Import types and APIs from graph-ts
-import {
-  BigInt,
-  ByteArray,
-  Bytes,
-  crypto,
-  ens,
-  log
-} from '@graphprotocol/graph-ts'
+import { BigInt, ByteArray, Bytes, crypto, log } from "@graphprotocol/graph-ts";
 
-import { byteArrayFromHex, concat, createEventID, uint256ToByteArray } from './utils'
+import {
+  byteArrayFromHex,
+  concat,
+  createEventID,
+  uint256ToByteArray,
+} from "./utils";
 
 // Import event types from the registry contract ABI
 import {
-  NameRegistered as NameRegisteredEvent,
   NameRenewed as NameRenewedEvent,
-  Transfer as TransferEvent
-} from './types/BaseRegistrar/BaseRegistrar'
+  Transfer as TransferEvent,
+} from "./types/BaseRegistrar/BaseRegistrar";
 
-import {
-  NameRegistered as ControllerNameRegisteredEventOld,
-} from './types/EthRegistrarControllerOld/EthRegistrarControllerOld'
+import { NameRegistered as ControllerNameRegisteredEventOld } from "./types/EthRegistrarControllerOld/EthRegistrarControllerOld";
 
 import {
   NameRegistered as ControllerNameRegisteredEvent,
-  NameRenewed as ControllerNameRenewedEvent
-} from './types/EthRegistrarController/EthRegistrarController'
+  NameRenewed as ControllerNameRenewedEvent,
+} from "./types/EthRegistrarController/EthRegistrarController";
 
 // Import entity types generated from the GraphQL schema
-import { Account, Domain, NameRegistered, NameRenewed, NameTransferred, Registration } from './types/schema'
+import {
+  Account,
+  Name,
+  NameRegistered,
+  NameRenewed,
+  NameTransferred,
+} from "./types/schema";
 
-var rootNode:ByteArray = byteArrayFromHex("93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae")
+var rootNode: ByteArray = byteArrayFromHex(
+  "93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae"
+);
 
-export function handleNameRegistered(event: NameRegisteredEvent): void {
-  let account = new Account(event.params.owner.toHex())
-  account.save()
+const normaliseId = (label: ByteArray): string =>
+  crypto.keccak256(concat(rootNode, label)).toHexString();
 
-  let label = uint256ToByteArray(event.params.id)
-  let registration = new Registration(label.toHex())
-  registration.domain = crypto.keccak256(concat(rootNode, label)).toHex()
-  registration.registrationDate = event.block.timestamp
-  registration.expiryDate = event.params.expires
-  registration.registrant = account.id
-
-  let labelName = ens.nameByHash(label.toHexString())
-  if (labelName != null) {
-    registration.labelName = labelName
+function handleNameRegistered<T>(event: T): void {
+  if (event instanceof ControllerNameRegisteredEvent) {
+    event = changetype<ControllerNameRegisteredEvent>(event);
+  } else {
+    event = changetype<ControllerNameRegisteredEventOld>(event);
   }
-  registration.save()
 
-  let registrationEvent = new NameRegistered(createEventID(event))
-  registrationEvent.registration = registration.id
-  registrationEvent.blockNumber = event.block.number.toI32()
-  registrationEvent.transactionID = event.transaction.hash
-  registrationEvent.registrant = account.id
-  registrationEvent.expiryDate = event.params.expires
-  registrationEvent.save()
+  let account = new Account(event.params.owner.toHex());
+  account.save();
+
+  let label = event.params.label;
+  let name = Name.load(normaliseId(label))!;
+  name.expiryDate = event.params.expires;
+  name.labelName = event.params.name;
+  if (event instanceof ControllerNameRegisteredEvent) {
+    name.ownershipLevel = "NAMEWRAPPER";
+    name.owner = account.id;
+  } else {
+    name.ownershipLevel = "REGISTRAR";
+    name.registrant = account.id;
+  }
+  name.save();
+
+  let nameEvent = new NameRegistered(createEventID(event));
+  nameEvent.name = name.id;
+  nameEvent.blockNumber = event.block.number.toI32();
+  nameEvent.transactionID = event.transaction.hash;
+  nameEvent.expiryDate = event.params.expires;
+  if (event instanceof ControllerNameRegisteredEvent) {
+    nameEvent.owner = account.id;
+    nameEvent.baseCost = event.params.baseCost;
+    nameEvent.premium = event.params.premium;
+  } else {
+    nameEvent.registrant = account.id;
+    nameEvent.baseCost = event.params.cost;
+    nameEvent.premium = BigInt.fromI32(0);
+  }
+  nameEvent.save();
 }
 
-export function handleNameRegisteredByControllerOld(event: ControllerNameRegisteredEventOld): void {
+export function handleNameRegisteredByControllerOld(
+  event: ControllerNameRegisteredEventOld
+): void {
+  setNamePreimage(event.params.name, event.params.label, event.params.cost);
+  handleNameRegistered(event);
+}
+
+export function handleNameRegisteredByController(
+  event: ControllerNameRegisteredEvent
+): void {
+  setNamePreimage(
+    event.params.name,
+    event.params.label,
+    event.params.baseCost.plus(event.params.premium)
+  );
+  handleNameRegistered(event);
+}
+
+export function handleNameRenewedByController(
+  event: ControllerNameRenewedEvent
+): void {
   setNamePreimage(event.params.name, event.params.label, event.params.cost);
 }
 
-export function handleNameRegisteredByController(event: ControllerNameRegisteredEvent): void {
-  setNamePreimage(event.params.name, event.params.label, event.params.baseCost.plus(event.params.premium))
-}
-
-export function handleNameRenewedByController(event: ControllerNameRenewedEvent): void {
-  setNamePreimage(event.params.name, event.params.label, event.params.cost);
-}
-
-function setNamePreimage(name: string, label: Bytes, cost: BigInt): void {
-  const labelHash = crypto.keccak256(ByteArray.fromUTF8(name));
-  if(!labelHash.equals(label)) {
-    log.warning(
-      "Expected '{}' to hash to {}, but got {} instead. Skipping.",
-      [name, labelHash.toHex(), label.toHex()]
-    );
+function setNamePreimage(nameStr: string, label: Bytes, cost: BigInt): void {
+  const labelHash = crypto.keccak256(ByteArray.fromUTF8(nameStr));
+  if (!labelHash.equals(label)) {
+    log.warning("Expected '{}' to hash to {}, but got {} instead. Skipping.", [
+      nameStr,
+      labelHash.toHex(),
+      label.toHex(),
+    ]);
     return;
   }
 
-  if(name.indexOf(".") !== -1) {
-    log.warning("Invalid label '{}'. Skipping.", [name]);
+  if (nameStr.indexOf(".") !== -1) {
+    log.warning("Invalid label '{}'. Skipping.", [nameStr]);
     return;
   }
 
-  let domain = Domain.load(crypto.keccak256(concat(rootNode, label)).toHex())!
-  if(domain.labelName !== name) {
-    domain.labelName = name
-    domain.name = name + '.eth'
-    domain.save()
+  let name = Name.load(crypto.keccak256(concat(rootNode, label)).toHex())!;
+  if (name.labelName !== nameStr) {
+    name.labelName = nameStr;
+    name.name = nameStr + ".eth";
+    name.cost = cost;
+    name.save();
   }
-
-  let registration = Registration.load(label.toHex());
-  if(registration == null) return
-  registration.labelName = name
-  registration.cost = cost
-  registration.save()
 }
 
 export function handleNameRenewed(event: NameRenewedEvent): void {
-  let label = uint256ToByteArray(event.params.id)
-  let registration = Registration.load(label.toHex())!
-  registration.expiryDate = event.params.expires
-  registration.save()
+  let label = uint256ToByteArray(event.params.id);
+  let name = Name.load(normaliseId(label))!;
+  name.expiryDate = event.params.expires;
+  name.save();
 
-  let registrationEvent = new NameRenewed(createEventID(event))
-  registrationEvent.registration = registration.id
-  registrationEvent.blockNumber = event.block.number.toI32()
-  registrationEvent.transactionID = event.transaction.hash
-  registrationEvent.expiryDate = event.params.expires
-  registrationEvent.save()
+  let nameEvent = new NameRenewed(createEventID(event));
+  nameEvent.name = name.id;
+  nameEvent.blockNumber = event.block.number.toI32();
+  nameEvent.transactionID = event.transaction.hash;
+  nameEvent.expiryDate = event.params.expires;
+  nameEvent.save();
 }
 
 export function handleNameTransferred(event: TransferEvent): void {
-  let account = new Account(event.params.to.toHex())
-  account.save()
+  let account = new Account(event.params.to.toHex());
+  account.save();
 
-  let label = uint256ToByteArray(event.params.tokenId)
-  let registration = Registration.load(label.toHex())
-  if(registration == null) return;
+  let label = uint256ToByteArray(event.params.tokenId);
+  let name = Name.load(normaliseId(label));
+  if (name == null) return;
 
-  registration.registrant = account.id
-  registration.save()
+  name.registrant = account.id;
+  name.save();
 
-  let transferEvent = new NameTransferred(createEventID(event))
-  transferEvent.registration = label.toHex()
-  transferEvent.blockNumber = event.block.number.toI32()
-  transferEvent.transactionID = event.transaction.hash
-  transferEvent.newOwner = account.id
-  transferEvent.save()
+  let transferEvent = new NameTransferred(createEventID(event));
+  transferEvent.name = name.id;
+  transferEvent.blockNumber = event.block.number.toI32();
+  transferEvent.transactionID = event.transaction.hash;
+  transferEvent.newOwner = account.id;
+  transferEvent.save();
 }

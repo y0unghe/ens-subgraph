@@ -124,8 +124,6 @@ dataSources:
         - name: BaseRegistrar
           file: ./abis/BaseRegistrar.json
       eventHandlers:
-        - event: "NameRegistered(indexed uint256,indexed address,uint256)"
-          handler: handleNameRegistered
         - event: "NameRenewed(indexed uint256,uint256)"
           handler: handleNameRenewed
         - event: "Transfer(indexed address,indexed address,indexed uint256)"
@@ -199,3 +197,7 @@ dataSources:
           handler: handleNameUnwrapped
         - event: "FusesSet(indexed bytes32,uint32,uint64)"
           handler: handleFusesSet
+        - event: "TransferSingle(indexed address,indexed address,indexed address,uint256,uint256)"
+          handler: handleSingleTransfer
+        - event: "TransferBatch(indexed address,indexed address,indexed address,uint256[],uint256[])"
+          handler: handleBatchTransfer

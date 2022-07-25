@@ -1,230 +1,242 @@
 // Import types and APIs from graph-ts
-import {
-  BigInt,
-  crypto,
-  ens,
-} from '@graphprotocol/graph-ts'
+import { BigInt, crypto, ens } from "@graphprotocol/graph-ts";
 
-import {
-  createEventID, concat, ROOT_NODE, EMPTY_ADDRESS
-} from './utils'
+import { concat, createEventID, EMPTY_ADDRESS, ROOT_NODE } from "./utils";
 
 // Import event types from the registry contract ABI
 import {
   NewOwner as NewOwnerEvent,
-  Transfer as TransferEvent,
   NewResolver as NewResolverEvent,
-  NewTTL as NewTTLEvent
-} from './types/ENSRegistry/EnsRegistry'
+  NewTTL as NewTTLEvent,
+  Transfer as TransferEvent,
+} from "./types/ENSRegistry/EnsRegistry";
 
 // Import entity types generated from the GraphQL schema
-import { Account, Domain, Resolver, NewOwner, Transfer, NewResolver, NewTTL } from './types/schema'
+import {
+  Account,
+  Name,
+  NewOwner,
+  NewResolver,
+  NewTTL,
+  Resolver,
+  Transfer,
+} from "./types/schema";
 
-const BIG_INT_ZERO = BigInt.fromI32(0)
+const BIG_INT_ZERO = BigInt.fromI32(0);
 
-function createDomain(node: string, timestamp: BigInt): Domain {
-  let domain = new Domain(node)
-  if(node == ROOT_NODE) {
-    domain = new Domain(node)
-    domain.owner = EMPTY_ADDRESS
-    domain.isMigrated = true
-    domain.createdAt = timestamp
-    domain.subdomainCount = 0
+function createName(node: string, timestamp: BigInt): Name {
+  let domain = new Name(node);
+  if (node == ROOT_NODE) {
+    domain = new Name(node);
+    domain.ownershipLevel = "REGISTRY";
+    domain.owner = EMPTY_ADDRESS;
+    domain.isMigrated = true;
+    domain.createdAt = timestamp;
+    domain.subnameCount = 0;
   }
-  return domain
+  return domain;
 }
 
-function getDomain(node: string, timestamp: BigInt = BIG_INT_ZERO): Domain | null {
-  let domain = Domain.load(node)
-  if(domain === null && node == ROOT_NODE) {
-    return createDomain(node, timestamp)
-  }else{
-    return domain
+function getName(node: string, timestamp: BigInt = BIG_INT_ZERO): Name | null {
+  let name = Name.load(node);
+  if (name === null && node == ROOT_NODE) {
+    return createName(node, timestamp);
+  } else {
+    return name;
   }
 }
 
-function makeSubnode(event:NewOwnerEvent): string {
-  return crypto.keccak256(concat(event.params.node, event.params.label)).toHexString()
+function makeSubnode(event: NewOwnerEvent): string {
+  return crypto
+    .keccak256(concat(event.params.node, event.params.label))
+    .toHexString();
 }
 
-function recurseDomainDelete(domain: Domain): string | null {
+function recurseNameDelete(name: Name): string | null {
   if (
-    (domain.resolver == null ||
-      domain.resolver!.split("-")[0] == EMPTY_ADDRESS) &&
-    domain.owner == EMPTY_ADDRESS &&
-    domain.subdomainCount == 0
+    (name.resolver == null || name.resolver!.split("-")[0] == EMPTY_ADDRESS) &&
+    name.owner == EMPTY_ADDRESS &&
+    name.subnameCount == 0
   ) {
-    const parentDomain = Domain.load(domain.parent!)
-    if (parentDomain != null) {
-      parentDomain.subdomainCount = parentDomain.subdomainCount - 1
-      parentDomain.save()
-      return recurseDomainDelete(parentDomain)
+    const parentName = Name.load(name.parent!);
+    if (parentName != null) {
+      parentName.subnameCount = parentName.subnameCount - 1;
+      parentName.save();
+      return recurseNameDelete(parentName);
     }
 
-    return null
+    return null;
   }
 
-  return domain.id
+  return name.id;
 }
 
-function saveDomain(domain: Domain): void {
-  recurseDomainDelete(domain)
-  domain.save()
+function saveName(name: Name): void {
+  recurseNameDelete(name);
+  name.save();
 }
 
 // Handler for NewOwner events
 function _handleNewOwner(event: NewOwnerEvent, isMigrated: boolean): void {
-  let account = new Account(event.params.owner.toHexString())
-  account.save()
+  let account = new Account(event.params.owner.toHexString());
+  account.save();
 
-  let subnode = makeSubnode(event)
-  let domain = getDomain(subnode, event.block.timestamp);
-  let parent = getDomain(event.params.node.toHexString())
+  let subnode = makeSubnode(event);
+  let name = getName(subnode, event.block.timestamp);
+  let parent = getName(event.params.node.toHexString());
 
-  if (domain === null) {
-    domain = new Domain(subnode)
-    domain.createdAt = event.block.timestamp
-    domain.subdomainCount = 0
+  if (name === null) {
+    name = new Name(subnode);
+    name.createdAt = event.block.timestamp;
+    name.subnameCount = 0;
+    name.ownershipLevel = "REGISTRY";
   }
 
-  if (domain.parent === null && parent !== null) {
-    parent.subdomainCount = parent.subdomainCount + 1
-    parent.save()
+  if (name.parent === null && parent !== null) {
+    parent.subnameCount = parent.subnameCount + 1;
+    parent.save();
   }
 
-  if(domain.name == null) {
+  if (name.name == null) {
     // Get label and node names
-    let label = ens.nameByHash(event.params.label.toHexString())
+    let label = ens.nameByHash(event.params.label.toHexString());
     if (label != null) {
-      domain.labelName = label
+      name.labelName = label;
     }
 
-    if(label === null) {
-      label = '[' + event.params.label.toHexString().slice(2) + ']'
+    if (label === null) {
+      label = "[" + event.params.label.toHexString().slice(2) + "]";
     }
-    if(event.params.node.toHexString() == '0x0000000000000000000000000000000000000000000000000000000000000000') {
-      domain.name = label
+    if (
+      event.params.node.toHexString() ==
+      "0x0000000000000000000000000000000000000000000000000000000000000000"
+    ) {
+      name.name = label;
     } else {
-      parent = parent!
-      let name = parent.name
-      if (label && name ) {
-        domain.name = label + '.'  + name
+      parent = parent!;
+      let parentName = parent.name!;
+      if (label && name) {
+        name.name = label + "." + parentName;
       }
     }
   }
 
-  domain.owner = event.params.owner.toHexString()
-  domain.parent = event.params.node.toHexString()
-  domain.labelhash = event.params.label
-  domain.isMigrated = isMigrated
-  saveDomain(domain)
+  name.owner = event.params.owner.toHexString();
+  name.parent = event.params.node.toHexString();
+  name.labelhash = event.params.label;
+  name.isMigrated = isMigrated;
+  name.ownershipLevel = "REGISTRY";
+  saveName(name);
 
-  let domainEvent = new NewOwner(createEventID(event))
-  domainEvent.blockNumber = event.block.number.toI32()
-  domainEvent.transactionID = event.transaction.hash
-  domainEvent.parentDomain = event.params.node.toHexString()
-  domainEvent.domain = subnode
-  domainEvent.owner = event.params.owner.toHexString()
-  domainEvent.save()
+  let nameEvent = new NewOwner(createEventID(event));
+  nameEvent.blockNumber = event.block.number.toI32();
+  nameEvent.transactionID = event.transaction.hash;
+  nameEvent.parentName = event.params.node.toHexString();
+  nameEvent.name = subnode;
+  nameEvent.owner = event.params.owner.toHexString();
+  nameEvent.save();
 }
 
 // Handler for Transfer events
 export function handleTransfer(event: TransferEvent): void {
-  let node = event.params.node.toHexString()
+  let node = event.params.node.toHexString();
 
-  let account = new Account(event.params.owner.toHexString())
-  account.save()
+  let account = new Account(event.params.owner.toHexString());
+  account.save();
 
   // Update the domain owner
-  let domain = getDomain(node)!
+  let name = getName(node)!;
 
-  domain.owner = event.params.owner.toHexString()
-  saveDomain(domain)
+  name.owner = event.params.owner.toHexString();
+  saveName(name);
 
-  let domainEvent = new Transfer(createEventID(event))
-  domainEvent.blockNumber = event.block.number.toI32()
-  domainEvent.transactionID = event.transaction.hash
-  domainEvent.domain = node
-  domainEvent.owner = event.params.owner.toHexString()
-  domainEvent.save()
+  let nameEvent = new Transfer(createEventID(event));
+  nameEvent.blockNumber = event.block.number.toI32();
+  nameEvent.transactionID = event.transaction.hash;
+  nameEvent.name = node;
+  nameEvent.owner = event.params.owner.toHexString();
+  nameEvent.save();
 }
 
 // Handler for NewResolver events
 export function handleNewResolver(event: NewResolverEvent): void {
-  let id = event.params.resolver.toHexString().concat('-').concat(event.params.node.toHexString())
+  let id = event.params.resolver
+    .toHexString()
+    .concat("-")
+    .concat(event.params.node.toHexString());
 
-  let node = event.params.node.toHexString()
-  let domain = getDomain(node)!
-  domain.resolver = id
+  let node = event.params.node.toHexString();
+  let name = getName(node)!;
+  name.resolver = id;
 
-  let resolver = Resolver.load(id)
-  if(resolver == null) {
-    resolver = new Resolver(id)
-    resolver.domain = event.params.node.toHexString()
-    resolver.address = event.params.resolver
-    resolver.save()
+  let resolver = Resolver.load(id);
+  if (resolver == null) {
+    resolver = new Resolver(id);
+    resolver.name = event.params.node.toHexString();
+    resolver.address = event.params.resolver;
+    resolver.save();
   } else {
-    domain.resolvedAddress = resolver.addr
+    name.resolvedAddress = resolver.addr;
   }
-  saveDomain(domain)
+  saveName(name);
 
-  let domainEvent = new NewResolver(createEventID(event))
-  domainEvent.blockNumber = event.block.number.toI32()
-  domainEvent.transactionID = event.transaction.hash
-  domainEvent.domain = node
-  domainEvent.resolver = id
-  domainEvent.save()
+  let nameEvent = new NewResolver(createEventID(event));
+  nameEvent.blockNumber = event.block.number.toI32();
+  nameEvent.transactionID = event.transaction.hash;
+  nameEvent.name = node;
+  nameEvent.resolver = id;
+  nameEvent.save();
 }
 
 // Handler for NewTTL events
 export function handleNewTTL(event: NewTTLEvent): void {
-  let node = event.params.node.toHexString()
-  let domain = getDomain(node)
+  let node = event.params.node.toHexString();
+  let name = getName(node);
   // For the edge case that a domain's owner and resolver are set to empty
   // in the same transaction as setting TTL
-  if (domain) {
-    domain.ttl = event.params.ttl
-    domain.save()
+  if (name) {
+    name.ttl = event.params.ttl;
+    name.save();
   }
 
-  let domainEvent = new NewTTL(createEventID(event))
-  domainEvent.blockNumber = event.block.number.toI32()
-  domainEvent.transactionID = event.transaction.hash
-  domainEvent.domain = node
-  domainEvent.ttl = event.params.ttl
-  domainEvent.save()
+  let nameEvent = new NewTTL(createEventID(event));
+  nameEvent.blockNumber = event.block.number.toI32();
+  nameEvent.transactionID = event.transaction.hash;
+  nameEvent.name = node;
+  nameEvent.ttl = event.params.ttl;
+  nameEvent.save();
 }
 
 export function handleNewOwner(event: NewOwnerEvent): void {
-  _handleNewOwner(event, true)
+  _handleNewOwner(event, true);
 }
 
 export function handleNewOwnerOldRegistry(event: NewOwnerEvent): void {
-  let subnode = makeSubnode(event)
-  let domain = getDomain(subnode)
+  let subnode = makeSubnode(event);
+  let name = getName(subnode);
 
-  if(domain == null || domain.isMigrated == false){
-    _handleNewOwner(event, false)
+  if (name == null || name.isMigrated == false) {
+    _handleNewOwner(event, false);
   }
 }
 
 export function handleNewResolverOldRegistry(event: NewResolverEvent): void {
-  let node = event.params.node.toHexString()
-  let domain = getDomain(node, event.block.timestamp)!
-  if(node == ROOT_NODE || !domain.isMigrated){
-    handleNewResolver(event)
+  let node = event.params.node.toHexString();
+  let name = getName(node, event.block.timestamp)!;
+  if (node == ROOT_NODE || !name.isMigrated) {
+    handleNewResolver(event);
   }
 }
 export function handleNewTTLOldRegistry(event: NewTTLEvent): void {
-  let domain = getDomain(event.params.node.toHexString())!
-  if(domain.isMigrated == false){
-    handleNewTTL(event)
+  let name = getName(event.params.node.toHexString())!;
+  if (name.isMigrated == false) {
+    handleNewTTL(event);
   }
 }
 
 export function handleTransferOldRegistry(event: TransferEvent): void {
-  let domain = getDomain(event.params.node.toHexString())!
-  if(domain.isMigrated == false){
-    handleTransfer(event)
+  let name = getName(event.params.node.toHexString())!;
+  if (name.isMigrated == false) {
+    handleTransfer(event);
   }
 }
