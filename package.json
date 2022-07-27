@@ -11,8 +11,8 @@
     "deploy-local": "graph deploy graphprotocol/ensGoerli --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020/",
     "deploy": "graph deploy ensdomains/ensGoerli --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
     "watch-local": "graph deploy graphprotocol/ensGoerli --watch --debug --node http://127.0.0.1:8020/ --ipfs http://localhost:5001",
-    "setup": "npm run codegen && npm run create-local && npm run deploy-local",
-    "docker:setup": "npm run codegen && npm run docker:create-local && npm run docker:deploy-local",
+    "setup": "yarn codegen && yarn create-local && yarn deploy-local",
+    "docker:setup": "yarn codegen && yarn docker:create-local && yarn docker:deploy-local",
     "docker:create-local": "graph create graphprotocol/ensGoerli --node http://ens-app_graph-node_1:8020",
     "docker:deploy-local": "graph deploy graphprotocol/ensGoerli --debug --ipfs http://ens-app_ipfs_1:5001 --node http://ens-app_graph-node_1:8020/",
     "docker:remove-local": "graph remove graphprotocol/ensGoerli --node http://ens-app_graph-node_1:8020"
@@ -21,6 +21,5 @@
     "@ensdomains/content-hash": "^2.5.3",
     "@graphprotocol/graph-cli": "^0.23.2",
     "@graphprotocol/graph-ts": "^0.23.1"
-  },
-  "dependencies": {}
+  }
 }
