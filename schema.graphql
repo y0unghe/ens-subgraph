@@ -160,7 +160,7 @@ type Resolver @entity {
   contentHash: Bytes # Content hash, in binary format.
   texts: [String!] # Set of observed text record keys
   coinTypes: [BigInt!] # Set of observed SLIP-44 coin types
-  primaryName: String
+  name: String
   events: [ResolverEvent!]! @derivedFrom(field: "resolver")
 }
 
