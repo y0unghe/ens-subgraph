@@ -104,23 +104,37 @@ type NameTransferred implements RegistrationEvent @entity {
   newOwner: Account!
 }
 
-type Resolver @entity {
-  id: ID!                   # Concatenation of resolver address and namehash
-  domain: Domain
-  address: Bytes!           # Address of resolver contract
+type ResolverVersion @entity {
+  id: ID!                                                       # Concatenation of resolver id and version number
+  resolver: Resolver!
+  version: BigInt!
+  addr: Account
+  contentHash: Bytes
+  texts: [String!]
+  coinTypes: [BigInt!]
+  events: [ResolverEvent!]! @derivedFrom(field: "versionId")
+}
 
-  addr: Account             # Current value of addr record (per events)
-  contentHash: Bytes        # Content hash, in binary format.
-  texts: [String!]          # Set of observed text record keys
-  coinTypes: [BigInt!]      # Set of observed SLIP-44 coin types
+type Resolver @entity {
+  id: ID!                                                       # Concatenation of resolver address and namehash
+  domain: Domain
+  address: Bytes!                                               # Address of resolver contract
+  version: BigInt!
+  versions: [ResolverVersion!] @derivedFrom(field: "resolver")
+
+  addr: Account                                                 # Current value of addr record (per events)
+  contentHash: Bytes                                            # Content hash, in binary format.
+  texts: [String!]                                              # Set of observed text record keys
+  coinTypes: [BigInt!]                                          # Set of observed SLIP-44 coin types
   events: [ResolverEvent!]! @derivedFrom(field: "resolver")
 }
 
 interface ResolverEvent {
-  id: ID!                   # Concatenation of block number and log ID
-  resolver: Resolver!       # Used to derive relationships to Resolvers
+  id: ID!                                                       # Concatenation of block number and log ID
+  resolver: Resolver!                                           # Used to derive relationships to Resolvers
   blockNumber: Int!
   transactionID: Bytes!
+  versionId: ResolverVersion!
 }
 
 type AddrChanged implements ResolverEvent @entity {
@@ -128,6 +142,7 @@ type AddrChanged implements ResolverEvent @entity {
   resolver: Resolver!
   blockNumber: Int!
   transactionID: Bytes!
+  versionId: ResolverVersion!
   addr: Account!
 }
 
@@ -136,6 +151,7 @@ type MulticoinAddrChanged implements ResolverEvent @entity {
   resolver: Resolver!
   blockNumber: Int!
   transactionID: Bytes!
+  versionId: ResolverVersion!
   coinType: BigInt!
   addr: Bytes!
 }
@@ -145,6 +161,7 @@ type NameChanged implements ResolverEvent @entity {
   resolver: Resolver!
   blockNumber: Int!
   transactionID: Bytes!
+  versionId: ResolverVersion!
   name: String!
 }
 
@@ -153,6 +170,7 @@ type AbiChanged implements ResolverEvent @entity {
   resolver: Resolver!
   blockNumber: Int!
   transactionID: Bytes!
+  versionId: ResolverVersion!
   contentType: BigInt!
 }
 
@@ -161,6 +179,7 @@ type PubkeyChanged implements ResolverEvent @entity {
   resolver: Resolver!
   blockNumber: Int!
   transactionID: Bytes!
+  versionId: ResolverVersion!
   x: Bytes!
   y: Bytes!
 }
@@ -170,6 +189,7 @@ type TextChanged implements ResolverEvent @entity {
   resolver: Resolver!
   blockNumber: Int!
   transactionID: Bytes!
+  versionId: ResolverVersion!
   key: String!
 }
 
@@ -178,6 +198,7 @@ type ContenthashChanged implements ResolverEvent @entity {
   resolver: Resolver!
   blockNumber: Int!
   transactionID: Bytes!
+  versionId: ResolverVersion!
   hash: Bytes!
 }
 
@@ -186,6 +207,7 @@ type InterfaceChanged implements ResolverEvent @entity {
   resolver: Resolver!
   blockNumber: Int!
   transactionID: Bytes!
+  versionId: ResolverVersion!
   interfaceID: Bytes!
   implementer: Bytes!
 }
@@ -198,4 +220,13 @@ type AuthorisationChanged implements ResolverEvent @entity {
   owner: Bytes!
   target: Bytes!
   isAuthorized: Boolean!
+}
+
+type VersionChanged implements ResolverEvent @entity {
+  id: ID!
+  resolver: Resolver!
+  blockNumber: Int!
+  transactionID: Bytes!
+  version: BigInt!
+  isNewVersion: Boolean!
 }
