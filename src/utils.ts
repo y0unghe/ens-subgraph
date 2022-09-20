@@ -2,8 +2,11 @@
 import {
   BigInt,
   ByteArray,
-  ethereum
+  ethereum,
+  Bytes,
+  Address,
 } from '@graphprotocol/graph-ts'
+import { Resolver, ResolverVersions } from './types/schema'
 
 export function createEventID(event:  ethereum.Event): string {
   return event.block.number.toString().concat('-').concat(event.logIndex.toString())
@@ -39,4 +42,44 @@ export function byteArrayFromHex(s: string): ByteArray {
 export function uint256ToByteArray(i: BigInt): ByteArray {
   let hex = i.toHex().slice(2).padStart(64, '0')
   return byteArrayFromHex(hex)
+}
+
+export function createResolverVersionsID(node: Bytes, resolver: Address): string {
+  return resolver.toHexString().concat('-').concat(node.toHexString())
+}
+
+export function createResolverID(node: Bytes, resolver: Address, version: BigInt): string {
+  return createResolverVersionsID(node, resolver).concat('-').concat(version.toString())
+}
+
+export function getOrCreateResolver(node: Bytes, address: Address, _version: BigInt | null = null): Resolver {
+  let resolverVersionsId = createResolverVersionsID(node, address)
+  let resolverVersions = ResolverVersions.load(resolverVersionsId)
+  let version = BigInt.fromI32(0)
+  if (_version) {
+    version = _version as BigInt
+  }
+  if (resolverVersions == null) {
+    resolverVersions = new ResolverVersions(resolverVersionsId)
+    resolverVersions.currentVersion = version
+    resolverVersions.save()
+  } else if (version > resolverVersions.currentVersion) {
+    resolverVersions.currentVersion = version
+    resolverVersions.save()
+  }
+  let id = createResolverID(node, address, resolverVersions.currentVersion)
+  let resolver = Resolver.load(id)
+  if(resolver == null) {
+    resolver = new Resolver(id)
+    resolver.domain = node.toHexString()
+    resolver.address = address
+    resolver.version = resolverVersions.currentVersion
+    resolver.versions = resolverVersionsId
+  }
+  return resolver as Resolver
+}
+
+export function getResolverID(node: Bytes, resolverAddress: Address): string {
+  let resolver = getOrCreateResolver(node, resolverAddress)
+  return resolver.id
 }

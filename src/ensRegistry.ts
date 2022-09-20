@@ -3,10 +3,12 @@ import {
   BigInt,
   crypto,
   ens,
+  Bytes,
+  Address,
 } from '@graphprotocol/graph-ts'
 
 import {
-  createEventID, concat, ROOT_NODE, EMPTY_ADDRESS
+  createEventID, concat, ROOT_NODE, EMPTY_ADDRESS, createResolverVersionsID, getOrCreateResolver
 } from './utils'
 
 // Import event types from the registry contract ABI
@@ -18,7 +20,7 @@ import {
 } from './types/ENSRegistry/EnsRegistry'
 
 // Import entity types generated from the GraphQL schema
-import { Account, Domain, Resolver, NewOwner, Transfer, NewResolver, NewTTL } from './types/schema'
+import { Account, Domain, Resolver, NewOwner, Transfer, NewResolver, NewTTL, ResolverVersions } from './types/schema'
 
 const BIG_INT_ZERO = BigInt.fromI32(0)
 
@@ -151,21 +153,13 @@ export function handleTransfer(event: TransferEvent): void {
 
 // Handler for NewResolver events
 export function handleNewResolver(event: NewResolverEvent): void {
-  let id = event.params.resolver.toHexString().concat('-').concat(event.params.node.toHexString())
+  let resolver = getOrCreateResolver(event.params.node, event.params.resolver)
+  let id = resolver.id
 
   let node = event.params.node.toHexString()
   let domain = getDomain(node)!
   domain.resolver = id
-
-  let resolver = Resolver.load(id)
-  if(resolver == null) {
-    resolver = new Resolver(id)
-    resolver.domain = event.params.node.toHexString()
-    resolver.address = event.params.resolver
-    resolver.save()
-  } else {
-    domain.resolvedAddress = resolver.addr
-  }
+  domain.resolvedAddress = resolver.addr
   saveDomain(domain)
 
   let domainEvent = new NewResolver(createEventID(event))
