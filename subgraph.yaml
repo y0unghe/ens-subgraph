@@ -165,9 +165,9 @@ dataSources:
     name: EthRegistrarController
     network: goerli
     source:
-      address: "0x4a16c6Bbee697b66706E7dc0101BfCA1d60cdE76"
+      address: "0x9C51161bA2FB02Cc0a403332B607117685f34831"
       abi: EthRegistrarController
-      startBlock: 7683122
+      startBlock: 7725756
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -189,9 +189,9 @@ dataSources:
     name: NameWrapper
     network: goerli
     source:
-      address: "0x9c4C40960B53e9A01af429D3f90aEf02Bd0c4c72"
+      address: "0x582224b8d4534F4749EFA4f22eF7241E0C56D4B8"
       abi: NameWrapper
-      startBlock: 7683114
+      startBlock: 7725751
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
