@@ -139,7 +139,7 @@ dataSources:
           handler: handleNameTransferred
   - kind: ethereum/contract
     name: EthRegistrarControllerOld
-    network: mainnet
+    network: goerli
     source:
       address: "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5"
       abi: EthRegistrarControllerOld
@@ -163,9 +163,11 @@ dataSources:
           handler: handleNameRenewedByController
   - kind: ethereum/contract
     name: EthRegistrarController
-    network: mainnet
+    network: goerli
     source:
+      address: "0x4a16c6Bbee697b66706E7dc0101BfCA1d60cdE76"
       abi: EthRegistrarController
+      startBlock: 7683122
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -185,9 +187,11 @@ dataSources:
           handler: handleNameRenewedByController
   - kind: ethereum/contract
     name: NameWrapper
-    network: mainnet
+    network: goerli
     source:
+      address: "0x9c4C40960B53e9A01af429D3f90aEf02Bd0c4c72"
       abi: NameWrapper
+      startBlock: 7683114
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
