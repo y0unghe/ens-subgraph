@@ -105,6 +105,7 @@ export function handleFusesSet(event: FusesSetEvent): void {
   fusesBurnedEvent.fuses = fuses
   fusesBurnedEvent.blockNumber = blockNumber
   fusesBurnedEvent.transactionID = transactionID
+  fusesBurnedEvent.expiry = expiry
   fusesBurnedEvent.save()
 }
 
