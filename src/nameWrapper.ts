@@ -100,13 +100,13 @@ export function handleFusesSet(event: FusesSetEvent): void {
   wrappedDomain.fuses = fuses
   wrappedDomain.expiryDate = expiry
   wrappedDomain.save()
-  let fusesBurnedEvent = new FusesSet(createEventID(event))  
-  fusesBurnedEvent.domain = node.toHex()
-  fusesBurnedEvent.fuses = fuses
-  fusesBurnedEvent.blockNumber = blockNumber
-  fusesBurnedEvent.transactionID = transactionID
-  fusesBurnedEvent.expiry = expiry
-  fusesBurnedEvent.save()
+  let fusesSetEvent = new FusesSet(createEventID(event))  
+  fusesSetEvent.domain = node.toHex()
+  fusesSetEvent.fuses = fuses
+  fusesSetEvent.blockNumber = blockNumber
+  fusesSetEvent.transactionID = transactionID
+  fusesSetEvent.expiry = expiry
+  fusesSetEvent.save()
 }
 
 function makeWrappedTransfer(blockNumber: i32, transactionID: Bytes, eventID: string, node: BigInt, to: string): void {
