@@ -7,6 +7,7 @@
     "codegen": "graph codegen --output-dir src/types/",
     "create-local": "graph create graphprotocol/ensGoerli --node http://127.0.0.1:8020",
     "remove-local": "graph remove graphprotocol/ensGoerli --node http://127.0.0.1:8020",
+    "test": "graph test",
     "build": "graph build",
     "deploy-local": "graph deploy graphprotocol/ensGoerli --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020/",
     "deploy": "graph deploy ensdomains/ensGoerli --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@ensdomains/content-hash": "^2.5.3",
     "@graphprotocol/graph-cli": "^0.23.2",
-    "@graphprotocol/graph-ts": "^0.23.1"
+    "@graphprotocol/graph-ts": "^0.29.1",
+    "matchstick-as": "^0.5.0"
   }
 }
