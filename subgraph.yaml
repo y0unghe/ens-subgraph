@@ -165,7 +165,7 @@ dataSources:
     name: EthRegistrarController
     network: goerli
     source:
-      address: "0x603A4F2e7615d0099244496883062bA2eFBbeaf0"
+      address: "0x5642D2E447567672723512a0D7b2E85994BB2FEb"
       abi: EthRegistrarController
       startBlock: 8371668
     mapping:
@@ -189,7 +189,7 @@ dataSources:
     name: NameWrapper
     network: goerli
     source:
-      address: "0x060f1546642E67c485D56248201feA2f9AB1803C"
+      address: "0x23d86f0bf4900978B191378B134519371Da52f75"
       abi: NameWrapper
       startBlock: 8371661
     mapping:
