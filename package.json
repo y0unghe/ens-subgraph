@@ -15,7 +15,9 @@
     "docker:deploy-local": "graph deploy graphprotocol/ens --ipfs http://ens-app_ipfs_1:5001 --node http://ens-app_graph-node_1:8020/ --version-label 0.0.1",
     "docker:remove-local": "graph remove graphprotocol/ens --node http://ens-app_graph-node_1:8020",
     "build": "graph build",
-    "deploy": "graph deploy ensdomains/ens --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
+    "deploy": "graph deploy --network mainnet --product hosted-service ensdomains/ens",
+    "deploy:goerli": "graph deploy --network goerli --product hosted-service ensdomains/ensgoerli",
+    "deploy:sepolia": "graph deploy --network sepolia --studio enssepolia",
     "watch-local": "graph deploy graphprotocol/ens --watch --debug --node http://127.0.0.1:8020/ --ipfs http://localhost:5001"
   },
   "devDependencies": {
