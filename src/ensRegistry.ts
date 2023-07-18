@@ -130,7 +130,7 @@ function _handleNewOwner(event: NewOwnerEvent, isMigrated: boolean): void {
   }
 
   // this is effectively an unwrap event UNLESS it's a namewrapper upgrade, but the namewrapper events should handle that situation
-  if (domain.wrappedDomain) {
+  if (domain.wrappedDomain.isSet("id")) {
     domain.wrappedOwner = null;
     if (domain.expiryDate && domain.parent !== ETH_NODE) {
       domain.expiryDate = null;
