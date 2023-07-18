@@ -136,7 +136,7 @@ function _handleNewOwner(event: NewOwnerEvent, isMigrated: boolean): void {
       domain.expiryDate = null;
     }
 
-    store.remove("WrappedDomain", event.params.node.toHex());
+    store.remove("WrappedDomain", subnode);
   }
 
   domain.owner = event.params.owner.toHexString();
