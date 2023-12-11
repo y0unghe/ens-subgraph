@@ -207,7 +207,7 @@ export function handleVersionChanged(event: VersionChangedEvent): void {
   resolverEvent.save();
 
   let domain = Domain.load(event.params.node.toHexString());
-  if (domain && domain.resolver === resolverEvent.resolver) {
+  if (domain && domain.resolver == resolverEvent.resolver) {
     domain.resolvedAddress = null;
     domain.save();
   }
@@ -223,7 +223,7 @@ export function handleVersionChanged(event: VersionChangedEvent): void {
 function getOrCreateResolver(node: Bytes, address: Address): Resolver {
   let id = createResolverID(node, address);
   let resolver = Resolver.load(id);
-  if (resolver === null) {
+  if (resolver == null) {
     resolver = new Resolver(id);
     resolver.domain = node.toHexString();
     resolver.address = address;

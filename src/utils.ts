@@ -72,13 +72,23 @@ export function checkValidLabel(name: string): boolean {
   for (let i = 0; i < name.length; i++) {
     let c = name.charCodeAt(i);
     if (c === 0) {
+      // 0 = null byte
       log.warning("Invalid label '{}' contained null byte. Skipping.", [name]);
       return false;
     } else if (c === 46) {
+      // 46 = .
       log.warning(
         "Invalid label '{}' contained separator char '.'. Skipping.",
         [name]
       );
+      return false;
+    } else if (c === 91) {
+      // 91 = [
+      log.warning("Invalid label '{}' contained char '['. Skipping.", [name]);
+      return false;
+    } else if (c === 93) {
+      // 93 = ]
+      log.warning("Invalid label '{}' contained char ']'. Skipping.", [name]);
       return false;
     }
   }

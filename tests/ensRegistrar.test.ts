@@ -215,3 +215,36 @@ test("does not assign label name to label with '.' separator", () => {
 
   checkNullLabelName(labelhash, labelhashAsInt, label);
 });
+
+test("does not assign label name to label with '[' char", () => {
+  const labelhash =
+    "0x6d2df8d29c51e5e79bce0067df6a093fd7e535f1fe0a509ead1eb5a2171640c9";
+  const labelhashAsInt =
+    "49383325924636276199200854251362239534766035480602437112552046254651845525705";
+  const label =
+    "[41ff1915eef2bf5841388d748bfcd23bd49ff5521ca4200c20bc0978b136c3cb";
+
+  checkNullLabelName(labelhash, labelhashAsInt, label);
+});
+
+test("does not assign label name to label with ']' char", () => {
+  const labelhash =
+    "0xb9cf267ed9b0cb8caf44655901be5b66f2e6bbedd8dc1436fba973f7a824db58";
+  const labelhashAsInt =
+    "84043880016553362091807057514212448616446700818045523307434280128309910362968";
+  const label =
+    "41ff1915eef2bf5841388d748bfcd23bd49ff5521ca4200c20bc0978b136c3cb]";
+
+  checkNullLabelName(labelhash, labelhashAsInt, label);
+});
+
+test("does not assign label name to label that uses unnormalised label notation", () => {
+  const labelhash =
+    "0x162894963b59f9b7e47a34709830c0211a6ba5f7de3973839f3ee7002e0c8434";
+  const labelhashAsInt =
+    "10022582060124759960163130513734713560279061696053801337665848910969813369908";
+  const label =
+    "[41ff1915eef2bf5841388d748bfcd23bd49ff5521ca4200c20bc0978b136c3cb]";
+
+  checkNullLabelName(labelhash, labelhashAsInt, label);
+});
