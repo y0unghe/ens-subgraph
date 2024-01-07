@@ -248,3 +248,42 @@ test("does not assign label name to label that uses unnormalised label notation"
 
   checkNullLabelName(labelhash, labelhashAsInt, label);
 });
+
+test("does assign normal label", () => {
+  const labelhash =
+    "0x9c22ff5f21f0b81b113e63f7db6da94fedef11b2119b4088b89664fb9a3cb658";
+  const labelhashAsInt =
+    "70622639689279718371527342103894932928233838121221666359043189029713682937432";
+  const label = "test";
+
+  const newNewOwnerEvent = createNewOwnerEvent(
+    ETH_NAMEHASH,
+    labelhash,
+    DEFAULT_OWNER
+  );
+  handleNewOwner(newNewOwnerEvent);
+
+  let newRegistrationEvent = createNameRegisteredEvent(
+    labelhashAsInt,
+    DEFAULT_OWNER,
+    "1610000000"
+  );
+  handleNameRegistered(newRegistrationEvent);
+
+  let fetchedRegistration = Registration.load(labelhash)!;
+
+  fetchedRegistration.labelName = "eth";
+  fetchedRegistration.save();
+
+  const nameRegisteredByControllerEvent = createNameRegisteredByControllerEvent(
+    label,
+    labelhash,
+    DEFAULT_OWNER,
+    "1610000000"
+  );
+  handleNameRegisteredByController(nameRegisteredByControllerEvent);
+
+  fetchedRegistration = Registration.load(labelhash)!;
+
+  assert.assertTrue(fetchedRegistration.labelName == label);
+});

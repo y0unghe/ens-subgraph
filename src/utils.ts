@@ -68,7 +68,12 @@ export function createOrLoadDomain(node: string): Domain {
   return domain;
 }
 
-export function checkValidLabel(name: string): boolean {
+export function checkValidLabel(name: string | null): boolean {
+  if (name == null) {
+    return false;
+  }
+  // for compiler
+  name = name!;
   for (let i = 0; i < name.length; i++) {
     let c = name.charCodeAt(i);
     if (c === 0) {
