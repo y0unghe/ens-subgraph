@@ -55,7 +55,7 @@ export function handleNameRegistered(event: NameRegisteredEvent): void {
   domain.expiryDate = event.params.expires.plus(GRACE_PERIOD_SECONDS);
 
   let labelName = ens.nameByHash(label.toHexString());
-  if (!isNullable(labelName) && checkValidLabel(labelName)) {
+  if (labelName != null && checkValidLabel(labelName)) {
     domain.labelName = labelName;
     domain.name = labelName! + ".eth";
     registration.labelName = labelName;

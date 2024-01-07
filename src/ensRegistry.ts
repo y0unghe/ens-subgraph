@@ -109,7 +109,7 @@ function _handleNewOwner(event: NewOwnerEvent, isMigrated: boolean): void {
   if (domain.name == null) {
     // Get label and node names
     let label = ens.nameByHash(event.params.label.toHexString());
-    if (!isNullable(label) && checkValidLabel(label)) {
+    if (label != null && checkValidLabel(label)) {
       domain.labelName = label;
     } else {
       label = "[" + event.params.label.toHexString().slice(2) + "]";
