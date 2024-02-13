@@ -18,11 +18,12 @@
     "deploy": "graph deploy --network mainnet --product hosted-service ensdomains/ens",
     "deploy:goerli": "graph deploy --network goerli --product hosted-service ensdomains/ensgoerli",
     "deploy:sepolia": "graph deploy --network sepolia --studio enssepolia",
+    "deploy:holesky": "graph deploy --network holesky --studio ensholesky",
     "watch-local": "graph deploy graphprotocol/ens --watch --debug --node http://127.0.0.1:8020/ --ipfs http://localhost:5001"
   },
   "devDependencies": {
     "@ensdomains/content-hash": "^2.5.3",
-    "@graphprotocol/graph-cli": "^0.51.2",
+    "@graphprotocol/graph-cli": "^0.67.2",
     "@graphprotocol/graph-ts": "^0.31.0",
     "assemblyscript": "^0.19.0",
     "matchstick-as": "^0.5.2",
