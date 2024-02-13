@@ -41,10 +41,7 @@ export function byteArrayFromHex(s: string): ByteArray {
 }
 
 export function uint256ToByteArray(i: BigInt): ByteArray {
-  let hex = i
-    .toHex()
-    .slice(2)
-    .padStart(64, "0");
+  let hex = i.toHex().slice(2).padStart(64, "0");
   return byteArrayFromHex(hex);
 }
 
@@ -68,17 +65,32 @@ export function createOrLoadDomain(node: string): Domain {
   return domain;
 }
 
-export function checkValidLabel(name: string): boolean {
+export function checkValidLabel(name: string | null): boolean {
+  if (name == null) {
+    return false;
+  }
+  // for compiler
+  name = name!;
   for (let i = 0; i < name.length; i++) {
-    let c = name.charCodeAt(i);
-    if (c === 0) {
+    let charCode = name.charCodeAt(i);
+    if (charCode === 0) {
+      // 0 = null byte
       log.warning("Invalid label '{}' contained null byte. Skipping.", [name]);
       return false;
-    } else if (c === 46) {
+    } else if (charCode === 46) {
+      // 46 = .
       log.warning(
         "Invalid label '{}' contained separator char '.'. Skipping.",
         [name]
       );
+      return false;
+    } else if (charCode === 91) {
+      // 91 = [
+      log.warning("Invalid label '{}' contained char '['. Skipping.", [name]);
+      return false;
+    } else if (charCode === 93) {
+      // 93 = ]
+      log.warning("Invalid label '{}' contained char ']'. Skipping.", [name]);
       return false;
     }
   }

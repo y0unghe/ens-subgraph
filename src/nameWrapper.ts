@@ -34,7 +34,7 @@ function decodeName(buf: Bytes): Array<string> | null {
   let len = buf[offset++];
   let hex = buf.toHexString();
   let firstLabel = "";
-  if (len === 0) {
+  if (len == 0) {
     return [firstLabel, "."];
   }
 
@@ -68,7 +68,7 @@ export function handleNameWrapped(event: NameWrappedEvent): void {
   let decoded = decodeName(event.params.name);
   let label: string | null = null;
   let name: string | null = null;
-  if (decoded !== null) {
+  if (decoded != null) {
     label = decoded[0];
     name = decoded[1];
   }
@@ -120,7 +120,7 @@ export function handleNameUnwrapped(event: NameUnwrappedEvent): void {
 
   let domain = createOrLoadDomain(node.toHex());
   domain.wrappedOwner = null;
-  if (domain.expiryDate && domain.parent !== ETH_NODE) {
+  if (domain.expiryDate && domain.parent != ETH_NODE) {
     domain.expiryDate = null;
   }
   domain.save();
