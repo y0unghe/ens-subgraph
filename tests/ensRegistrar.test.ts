@@ -11,14 +11,10 @@ import {
   handleNameRegisteredByController,
 } from "../src/ethRegistrar";
 import { NameRegistered } from "../src/types/BaseRegistrar/BaseRegistrar";
-import { NewOwner } from "../src/types/ENSRegistry/EnsRegistry";
 import { NameRegistered as NameRegisteredByController } from "../src/types/EthRegistrarController/EthRegistrarController";
 import { Registration } from "../src/types/schema";
-
-const ETH_NAMEHASH =
-  "0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae";
-
-const DEFAULT_OWNER = "0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7";
+import { ETH_NODE } from "../src/utils";
+import { createNewOwnerEvent, DEFAULT_OWNER, setEthOwner } from "./testUtils";
 
 const createNameRegisteredByControllerEvent = (
   name: string,
@@ -73,42 +69,6 @@ const createNameRegisteredByControllerEvent = (
   return nameRegisteredByControllerEvent;
 };
 
-const createNewOwnerEvent = (
-  node: string,
-  label: string,
-  owner: string
-): NewOwner => {
-  let mockEvent = newMockEvent();
-  let newNewOwnerEvent = new NewOwner(
-    mockEvent.address,
-    mockEvent.logIndex,
-    mockEvent.transactionLogIndex,
-    mockEvent.logType,
-    mockEvent.block,
-    mockEvent.transaction,
-    mockEvent.parameters,
-    mockEvent.receipt
-  );
-
-  newNewOwnerEvent.parameters = new Array();
-  let nodeParam = new ethereum.EventParam(
-    "node",
-    ethereum.Value.fromBytes(Bytes.fromHexString(node))
-  );
-  let labelParam = new ethereum.EventParam(
-    "label",
-    ethereum.Value.fromBytes(Bytes.fromHexString(label))
-  );
-  let ownerParam = new ethereum.EventParam(
-    "owner",
-    ethereum.Value.fromAddress(Address.fromString(owner))
-  );
-  newNewOwnerEvent.parameters.push(nodeParam);
-  newNewOwnerEvent.parameters.push(labelParam);
-  newNewOwnerEvent.parameters.push(ownerParam);
-  return newNewOwnerEvent;
-};
-
 const createNameRegisteredEvent = (
   id: string,
   owner: string,
@@ -145,16 +105,7 @@ const createNameRegisteredEvent = (
 };
 
 beforeAll(() => {
-  const ethLabelhash =
-    "0x4f5b812789fc606be1b3b16908db13fc7a9adf7ca72641f84d75b47069d3d7f0";
-  const emptyNode =
-    "0x0000000000000000000000000000000000000000000000000000000000000000";
-  const newNewOwnerEvent = createNewOwnerEvent(
-    emptyNode,
-    ethLabelhash,
-    DEFAULT_OWNER
-  );
-  handleNewOwner(newNewOwnerEvent);
+  setEthOwner();
 });
 
 const checkNullLabelName = (
@@ -163,7 +114,7 @@ const checkNullLabelName = (
   label: string
 ): void => {
   const newNewOwnerEvent = createNewOwnerEvent(
-    ETH_NAMEHASH,
+    ETH_NODE,
     labelhash,
     DEFAULT_OWNER
   );
@@ -257,7 +208,7 @@ test("does assign normal label", () => {
   const label = "test";
 
   const newNewOwnerEvent = createNewOwnerEvent(
-    ETH_NAMEHASH,
+    ETH_NODE,
     labelhash,
     DEFAULT_OWNER
   );

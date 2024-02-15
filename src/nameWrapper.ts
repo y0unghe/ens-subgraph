@@ -193,12 +193,7 @@ function makeWrappedTransfer(
   to: string
 ): void {
   const _to = createOrLoadAccount(to);
-  const namehash =
-    "0x" +
-    node
-      .toHex()
-      .slice(2)
-      .padStart(64, "0");
+  const namehash = "0x" + node.toHex().slice(2).padStart(64, "0");
   const domain = createOrLoadDomain(namehash);
   let wrappedDomain = WrappedDomain.load(namehash);
   // new registrations emit the Transfer` event before the NameWrapped event
@@ -242,9 +237,7 @@ export function handleTransferBatch(event: TransferBatchEvent): void {
     makeWrappedTransfer(
       blockNumber,
       transactionID,
-      createEventID(event)
-        .concat("-")
-        .concat(i.toString()),
+      createEventID(event).concat("-").concat(i.toString()),
       ids[i],
       to.toHex()
     );

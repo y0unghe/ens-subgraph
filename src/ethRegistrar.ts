@@ -2,7 +2,6 @@
 import { BigInt, ByteArray, Bytes, crypto, ens } from "@graphprotocol/graph-ts";
 
 import {
-  byteArrayFromHex,
   checkValidLabel,
   concat,
   createEventID,
@@ -36,7 +35,7 @@ import {
 
 const GRACE_PERIOD_SECONDS = BigInt.fromI32(7776000); // 90 days
 
-var rootNode: ByteArray = byteArrayFromHex(ETH_NODE);
+var rootNode: ByteArray = ByteArray.fromHexString(ETH_NODE);
 
 export function handleNameRegistered(event: NameRegisteredEvent): void {
   let account = new Account(event.params.owner.toHex());
